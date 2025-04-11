@@ -132,53 +132,20 @@
         box-sizing: border-box;
         -webkit-print-color-adjust: exact; /* Ensure colors are printed */
         print-color-adjust: exact; /* Ensure colors are printed */
+        overflow: hidden; /* Prevent extra page overflow */
       }
       .container {
         width: 100%;
         max-width: 100%;
         box-shadow: none;
-        padding: 10mm; /* Reduced padding for better fit */
-        margin: 0;
+        padding: 20px; /* Add padding for better print layout */
+        margin: 0; /* Remove margin */
         border-radius: 0;
         box-sizing: border-box;
       }
-      h1 {
-        font-size: 22px; /* Slightly smaller font size */
-        margin-bottom: 5px;
-        color: #1565c0; /* Ensure header color is preserved */
-      }
-      h2 {
-        font-size: 16px; /* Slightly smaller font size */
-        margin: 15px 0 8px 0;
-        border-bottom: 1px solid #1565c0;
-        padding-bottom: 3px;
-        color: #1565c0; /* Ensure section header color is preserved */
-      }
-      .contact-info {
-        font-size: 11px; /* Reduced font size */
-        margin-bottom: 10px;
-      }
-      .contact-info a {
-        color: #1565c0; /* Ensure link color is preserved */
-      }
-      ul {
-        padding-left: 15px;
-      }
-      li {
-        margin-bottom: 4px;
-      }
-      p {
-        font-size: 12px; /* Reduced font size */
-        margin: 8px 0;
-      }
-      .declaration {
-        font-size: 10px; /* Reduced font size */
-        border-top: 1px solid #000;
-        padding-top: 8px;
-        margin-top: 15px;
-      }
-      .download-btn {
-        display: none;
+      h1, h2, .contact-info, ul, li, p, .declaration {
+        margin: 0; /* Remove unnecessary margins */
+        padding: 0; /* Remove unnecessary padding */
       }
       section {
         page-break-inside: avoid; /* Prevent content from breaking across pages */
@@ -188,14 +155,17 @@
         page-break-after: avoid; /* Ensure header stays on the first page */
       }
       .experience-item {
-        border-left-color: #1565c0; /* Ensure border color is preserved */
+        border-left-color: #000; /* Ensure border color is preserved */
+        page-break-inside: avoid; /* Prevent breaking inside experience items */
       }
       .skill-tag {
-        background-color: #e3f2fd; /* Ensure skill tag background color is preserved */
-        color: #1565c0;
+        background-color: #ddd; /* Ensure skill tag background color is preserved */
       }
       @page {
-        margin: 10mm; /* Explicit page margins */
+        margin: 20mm; /* Add margins for better print layout */
+      }
+      .download-btn {
+        display: none; /* Hide buttons when printing */
       }
     }
     
@@ -262,11 +232,14 @@
       margin-bottom: 25px;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <!-- Download Button -->
-    <button class="download-btn" onclick="window.print()">Download Resume</button>
+    <!-- Download Buttons -->
+    <!-- <button class="download-btn" onclick="window.print()">Print Resume</button> -->
+    <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
     
     <!-- Header -->
     <header>
@@ -349,5 +322,57 @@
       <p>Date: 10/04/2025</p>
     </section>
   </div>
+  <script>
+    async function downloadPDF() {
+      const container = document.querySelector('.container');
+      const buttons = document.querySelectorAll('.download-btn');
+
+      try {
+        // Temporarily hide buttons
+        buttons.forEach(btn => btn.style.display = 'none');
+
+        // Wait for DOM to update
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+        });
+
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+
+        const scaleFactor = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const scaledWidth = imgWidth * scaleFactor;
+        const scaledHeight = imgHeight * scaleFactor;
+
+        const xPosition = (pdfWidth - scaledWidth) / 2;
+        const yPosition = (pdfHeight - scaledHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', xPosition, yPosition, scaledWidth, scaledHeight);
+
+        pdf.save('Abhishek_Resume.pdf');
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        alert("Failed to generate PDF. Please try again.");
+      } finally {
+        // Restore buttons
+        buttons.forEach(btn => btn.style.display = 'inline-block');
+      }
+    }
+  </script>
 </body>
 </html>
