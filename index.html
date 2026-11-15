@@ -16,6 +16,27 @@
       line-height: 1.6;
     }
 
+    .container.pdf-export {
+      width: auto;
+      max-width: 800px;
+      padding: 12px;
+      box-shadow: none;
+      border-radius: 0;
+      line-height: 1.35;
+    }
+
+    .pdf-export section {
+      margin-bottom: 12px;
+    }
+
+    .pdf-export h2 {
+      margin: 14px 0 8px;
+    }
+
+    .pdf-export header {
+      margin-bottom: 14px;
+    }
+
     .container {
       max-width: 800px;
       margin: auto;
@@ -156,18 +177,14 @@
         /* Ensure colors are printed */
         print-color-adjust: exact;
         /* Ensure colors are printed */
-        overflow: hidden;
-        /* Prevent extra page overflow */
       }
 
       .container {
         width: 100%;
         max-width: 100%;
         box-shadow: none;
-        padding: 20px;
-        /* Add padding for better print layout */
+        padding: 8px;
         margin: 0;
-        /* Remove margin */
         border-radius: 0;
         box-sizing: border-box;
       }
@@ -210,8 +227,7 @@
       }
 
       @page {
-        margin: 20mm;
-        /* Add margins for better print layout */
+        margin: 6mm;
       }
 
       .download-btn {
@@ -330,11 +346,14 @@
       <h2>Experience</h2>
       <div class="experience-item">
         <div class="experience-header">
-          <strong>Prolidac Health Care</strong>
-          <em>6 months</em>
+          <strong>Alkem Laboratories</strong>
+          <em>Sep 2025 - Till Date</em>
         </div>
         <ul>
-          <li>Worked as a Sales Intern</li>
+          <li>Worked as a Medical Representative</li>
+          <li>Promoted products through visits and presentations to doctors.</li>
+          <li>Managed territory visits, pharmacy coordination, and sales targets.</li>
+          <li>Shared market updates and healthcare professional feedback.</li>
         </ul>
       </div>
       <div class="experience-item">
@@ -380,7 +399,8 @@
         I hereby declare that all the above information is correct to the best of my knowledge and I bear the
         responsibility for the correctness of the above-mentioned particulars.
       </p>
-      <p>Date: 10/04/2025</p>
+
+      <p>Date: <span class="current-date"></span></p>
     </section>
   </div>
   <script>
@@ -391,6 +411,7 @@
       try {
         // Temporarily hide buttons
         buttons.forEach(btn => btn.style.display = 'none');
+        container.classList.add('pdf-export');
 
         // Wait for DOM to update
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -412,14 +433,15 @@
         const imgData = canvas.toDataURL('image/png', 1.0);
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-
-        const imgWidth = canvas.width;
-        const imgHeight = canvas.height;
-
-        const scaleFactor = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-        const scaledWidth = imgWidth * scaleFactor;
-        const scaledHeight = imgHeight * scaleFactor;
-
+        const margin = 5;
+        const contentWidth = pdfWidth - margin * 2;
+        const contentHeight = pdfHeight - margin * 2;
+        const scaleFactor = Math.min(
+          contentWidth / canvas.width,
+          contentHeight / canvas.height
+        );
+        const scaledWidth = canvas.width * scaleFactor;
+        const scaledHeight = canvas.height * scaleFactor;
         const xPosition = (pdfWidth - scaledWidth) / 2;
         const yPosition = (pdfHeight - scaledHeight) / 2;
 
@@ -432,13 +454,13 @@
       } finally {
         // Restore buttons
         buttons.forEach(btn => btn.style.display = 'inline-block');
+        container.classList.remove('pdf-export');
       }
     }
 
     const currentDateElements = document.querySelectorAll(".current-date");
     const now = new Date();
-    const options = { year: "numeric", month: "long" };
-    const formattedDate = now.toLocaleDateString("en-US", options);
+    const formattedDate = now.toLocaleDateString("en-GB");
 
     currentDateElements.forEach(el => {
       el.textContent = formattedDate;
